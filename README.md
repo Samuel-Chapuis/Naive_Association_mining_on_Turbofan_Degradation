@@ -1,27 +1,140 @@
-# Early-Warning Rule Mining for Turbofan Engine Degradation
+# Early-Warning Rule Mining for Turbofan Engine Degradation 
 
-## Abstract
+## Abstract   
 
-**Dataset Chosen**  
-Real — [NASA C-MAPSS Turbofan Degradation Simulation](https://www.kaggle.com/datasets/behrad3d/nasa-cmaps?phase=FinishSSORegistration&returnUrl=%2Fdatasets%2Fbehrad3d%2Fnasa-cmaps%2Fversions%2F1%3Fresource%3Ddownload&SSORegistrationToken=CfDJ8HYJ4SW6YXhJj8CRciRldeQp3vLwXO6nzSOXQNl5WM8uj81ufxise7BG1lIuAdtFOhJ3kZQmvZPY-UZRBleTT4Ms8tMW82ia1BQ0goXwMrf9Xxpyt6OwSTRptS-C6S9R8lU1g0aeDNQQEx3UnanEx371bU4zxHOtVoJ3sbPDiIwBWuEwLPjo45t3wpxb-BFrcfIbBGW0kj40tW1aD2dIeq5hibfSw3BfJt2k8109UXTuOy4oPzK3kCVXhtMc1WIH28b0mVG8WZBf0goflvAcB8NfaVsKqZupO47ML2KG9QhegtFMVY2BAZ3QXR0HYdmOO4qWrro2Vntj_JnZZZE6IZl4C4A0&DisplayName=Nut%27+ella), subset FD001 (100 engines, 21 sensors)
+**Dataset**  
+NASA **C-MAPSS Turbofan Degradation Simulation (subset FD001)**, publicly available through the Prognostics Center of Excellence (PCoE) and mirrored on Kaggle.  
 
-**Goal**  
-This study investigates whether interpretable association rules can serve as reliable early-warning indicators for jet-engine failure. We ask: *Which combinations of sensor behaviours systematically precede a drop in remaining useful life (RUL) below 50 cycles?*
+**Objective**  
+To determine whether **interpretable association rules** can serve as reliable early-warning indicators for jet-engine failure.  
+*Research Question:* *Which combinations of sensor behaviors consistently precede a drop in remaining useful life (RUL) below 50 cycles?*  
 
-**Features of Interest**  
-Time-series readings from 21 on-board sensors (temperatures, pressures, fan speed, fuel-flow, vibration) plus three operating-condition variables.
+**Features**  
+Twenty-one onboard sensor streams (temperatures, pressures, fan speed, fuel flow, vibration) and three operating-condition variables.  
 
-**Plan to Handle Continuous Variables**  
+**Data Processing Approach**  
 For each sliding window of 25 cycles we:  
-1. Discretise sensor values into **Low** (≤10th percentile), **Normal**, **High** (≥90th percentile).  
-2. Label short-term trends as **Rising** or **Falling** via first-difference sign.  
-3. Encode each window as a transaction containing the active categorical flags.
+1. Discretize each sensor reading into **Low** (≤10ᵗʰ percentile), **Normal**, **High** (≥90ᵗʰ percentile)  
+2. Encode short-term trends as **Rising** or **Falling** using the sign of the first difference  
+3. Represent the window as a transaction containing the active categorical flags  
 
-**Proposed Rule-Mining Approach**  
-FP-Growth with *min-support* = 3 % and *min-confidence* = 0.8, followed by filtering on lift > 1.5. Consequents are restricted to the binary target *Fail ≤ 50*.
+**Rule Mining Strategy**  
+FP-Growth algorithm with parameters:
+- `min_support = 3%`
+- `min_confidence = 0.8` 
+- `min_lift > 1.5`
+- Consequents restricted to binary target `Fail≤50`
 
-**Expected Outcome**  
-We expect to discover a concise set of high-lift rules (e.g., `{T50_High, s11_Rising, s15_Drop} → Fail ≤ 50`) that predict imminent failure with ≥80 % confidence and offer >1.5× information gain over baseline.
+### Association Rule Mining Approach
 
-**Why This Matters**  
-The resulting rule set provides a transparent decision layer for airline maintenance and MRO teams. By flagging hazardous sensor patterns up to 50 cycles in advance, operators can schedule inspections, prevent in-service shutdowns, and cut unplanned downtime—while retaining full interpretability for engineering audit and regulatory compliance.
+**Key Concepts:**
+* The target label is engineered from raw data to guide rule extraction
+* For FP-Growth, `Fail≤50` functions as a transaction item, similar to market basket analysis
+* Meaningful patterns emerge when filtering for rules predicting the `Fail≤50` item
+
+**Benefits:**
+* **Focus:** From ~100,000 potential rules, we extract only those relevant to failure prediction, improving interpretability
+* **Evaluation:** Binary alert status enables calculation of precision, recall, and other metrics for comparison with alternative predictive maintenance methods
+
+**Expected Outcomes**  
+A concise rule set (e.g. `{T50_High, s11_Rising, s15_Drop} → Fail≤50`) predicting imminent failure with:
+- Confidence ≥ 80%
+- Information gain > 1.5× baseline
+
+**Business Impact**  
+The rules provide:
+- Transparent decision support for maintenance teams
+- Early warning up to 50 cycles in advance
+- Support for proactive maintenance scheduling
+- Full auditability for engineering review
+- Regulatory compliance documentation
+
+---  
+
+## Study Design and Data Source  
+
+| Item | Detail |
+|------|--------|
+| **Dataset Name** | C-MAPSS Turbofan Degradation Simulation – FD001 subset |
+| **Source** | NASA Prognostics Center of Excellence (PCoE); Kaggle mirror |
+| **Observations** | 20,631 training rows (100 engines) |
+| **Variables** | 26 total (unit ID, cycle, 3 operating settings, 21 sensors) |
+| **Description** | Time-series data of simulated turbofan engine operations from healthy start until failure. Includes sensor readings (temperatures, pressures, speeds) and operating conditions (altitude, Mach number, throttle angle). RUL calculated as cycles until failure. |
+
+---  
+
+## Target Variable  
+
+| Field | Detail |
+|-------|--------|
+| **Name** | `Fail≤50` |
+| **Type** | Binary flag |
+| **Definition** | 1 when window midpoint is within 50 cycles of failure; 0 otherwise |
+
+| Category | Count | Percentage |
+|----------|------:|----------:|
+| 1 (Fail≤50) | *(pending)* | *(pending)* |
+| 0 (Healthy) | *(pending)* | *(pending)* |
+
+*(To be populated after feature engineering)*
+
+---  
+
+## Variable Statistics  
+
+### Categorical Features
+*(post-discretization)*
+
+| Variable | Category | Count | Percentage |
+|----------|----------|------:|----------:|
+| `T50_flag` | High | *(pending)* | *(pending)* |
+|           | Low  | *(pending)* | *(pending)* |
+|           | Rising | *(pending)* | *(pending)* |
+|           | Falling | *(pending)* | *(pending)* |
+
+### Continuous Features
+*(pre-binning)*
+
+| Variable | Min | Max | Mean | Median | Std Dev |
+|----------|----:|----:|-----:|-------:|---------:|
+| `T30` | *(pending)* | *(pending)* | *(pending)* | *(pending)* | *(pending)* |
+| `P15` | *(pending)* | *(pending)* | *(pending)* | *(pending)* | *(pending)* |
+
+*(To be generated via `df.describe()`)*
+
+---  
+
+## Feature Engineering Decisions  
+
+| Variable | Action | Rationale |
+|----------|--------|-----------|
+| `unit` | Drop | Identifier only |
+| `cycle` | Transform→RUL, Drop | Used for RUL calculation |
+| `op_setting_1` | Keep | Altitude load effects |
+| `op_setting_2` | Keep | Mach number correlations |
+| `op_setting_3` | Drop | No variance in FD001 |
+| Sensors (21) | Bin + Trend | Level/trajectory capture |
+| `RUL` | Binary `Fail≤50` | Rule mining target |
+
+**Processing Details:**
+- **Binning:** 10ᵗʰ/90ᵗʰ percentile thresholds isolate failure-preceding extremes
+- **Trends:** 25-cycle window first difference for trajectory
+
+---  
+
+## Visualizations  
+
+*(Placeholder for:)*
+- *RUL distribution histogram*
+- *Sensor correlation heatmap*
+- *Top-lift rules bar chart*
+
+---  
+
+## Final Notes  
+
+**Documentation Checklist:**
+- [x] All variables explained
+- [x] Processing steps justified
+- [x] Clear technical writing
+- [ ] Peer review ready
