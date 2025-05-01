@@ -38,7 +38,7 @@ FP-Growth algorithm with parameters:
 
 **Expected Outcomes**  
 A concise rule set (e.g. `{T50_High, s11_Rising, s15_Drop} → Fail≤50`) predicting imminent failure with:
-- Confidence ≥ 80%
+- Confidence ≥ 90%
 - Information gain > 1.5× baseline
 
 **Business Impact**  
@@ -112,15 +112,43 @@ The rules provide:
 | Sensors (21) | Bin + Trend | Level/trajectory capture |
 | `RUL` | Binary `Fail≤50` | Rule mining target |
 
-**Processing Details:**
-- **Binning:** 10ᵗʰ/90ᵗʰ percentile thresholds isolate failure-preceding extremes
-- **Trends:** 25-cycle window first difference for trajectory
+## Processing Details
+1. **Data Loading and RUL Calculation**  
+   - Load the training and test datasets using `pandas.read_csv()` with predefined column names.  
+   - Compute each engine’s Remaining Useful Life (RUL) by grouping on the engine identifier (`unit`) and subtracting the current cycle from the maximum cycle observed, then drop the temporary column.
 
----  
+2. **Transaction Creation via Sliding Windows**  
+   - For each engine, use a sliding window (length = 25 cycles) to extract a segment of sensor readings.  
+   - Discretize each sensor value by comparing its mean over the window against the 10ᵗʰ (Low) and 90ᵗʰ (High) percentiles.  
+   - Capture short-term trends by tagging the window as `Rising` if the last sensor value exceeds the first, or `Falling` otherwise.
+   - Append failure labels (`Fail≤50` and `Fail≤90`) to a window based on the RUL at its end.
+
+3. **Transaction Encoding and Verification**  
+   - Encode the list of sensor feature sets using `mlxtend.preprocessing.TransactionEncoder` to form a one-hot encoded DataFrame.  
+   - Confirm that the number of generated windows matches the expected total calculated from the dataset.
+
+4. **Data Cleaning and Visualization**  
+   - Remove constant (uninformative) features from the generated transactions.  
+   - Visualize the frequency of the most common features and display a sample binary feature matrix to inspect the data.
+
+5. **Association Rule Mining and Network Visualization**  
+   - Extract frequent itemsets using the FP-Growth (apriori) algorithm with specified parameters (min_support=0.03, min_confidence=0.8, lift > 1.5).  
+   - Generate association rules filtered on lift and target labels (`Fail≤50` and `Fail≤90`).  
+   - Visualize the top rules and their interrelationships through network graphs for both failure thresholds.
 
 ## Visualizations  
+<div style="display: flex; justify-content: space-between;">
+	<img src="Documentation/ressources/figures/Fail50.png" width="48%" alt="Rule Network for RUL ≤ 50"/>
+	<img src="Documentation/ressources/figures/Fail90.png" width="48%" alt="Rule Network for RUL ≤ 90"/>
+</div>
 
----  
+<div style="margin-bottom: 20px;"></div>
+
+<div style="text-align: center">
+	<img src="Documentation/ressources/figures/Comparaison.png" width="80%" alt="Sensor Trends Over Time"/>
+</div>
+
+These graphs show how the top 10 most predictive features vary across time leading to failure, helping to visually confirm the rule mining output.
 
 ## Final Notes  
 
@@ -128,4 +156,3 @@ The rules provide:
 - [x] All variables explained
 - [x] Processing steps justified
 - [x] Clear technical writing
-- [ ] Peer review ready
