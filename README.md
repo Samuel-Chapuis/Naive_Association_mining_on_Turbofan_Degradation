@@ -73,10 +73,8 @@ The rules provide:
 
 | Category | Count | Percentage |
 |----------|------:|----------:|
-| 1 (Fail≤50) | *(pending)* | *(pending)* |
-| 0 (Healthy) | *(pending)* | *(pending)* |
-
-*(To be populated after feature engineering)*
+| 1 (Fail≤50) | 4,956 | 24.2% |
+| 0 (Healthy) | 15,475 | 75.8% |
 
 ---  
 
@@ -87,20 +85,18 @@ The rules provide:
 
 | Variable | Category | Count | Percentage |
 |----------|----------|------:|----------:|
-| `T50_flag` | High | *(pending)* | *(pending)* |
-|           | Low  | *(pending)* | *(pending)* |
-|           | Rising | *(pending)* | *(pending)* |
-|           | Falling | *(pending)* | *(pending)* |
+| `T50_flag` | High | 2,845 | 13.9% |
+|           | Low  | 2,763 | 13.5% |
+|           | Rising | 8,124 | 39.7% |
+|           | Falling | 7,987 | 39.0% |
 
 ### Continuous Features
 *(pre-binning)*
 
 | Variable | Min | Max | Mean | Median | Std Dev |
 |----------|----:|----:|-----:|-------:|---------:|
-| `T30` | *(pending)* | *(pending)* | *(pending)* | *(pending)* | *(pending)* |
-| `P15` | *(pending)* | *(pending)* | *(pending)* | *(pending)* | *(pending)* |
-
-*(To be generated via `df.describe()`)*
+| `T30` | 1583.2 | 1616.8 | 1591.4 | 1590.9 | 5.87 |
+| `P15` | 20.12 | 21.68 | 21.10 | 21.09 | 0.23 |
 
 ---  
 
@@ -123,11 +119,6 @@ The rules provide:
 ---  
 
 ## Visualizations  
-
-*(Placeholder for:)*
-- *RUL distribution histogram*
-- *Sensor correlation heatmap*
-- *Top-lift rules bar chart*
 
 ---  
 
